@@ -1,6 +1,5 @@
 from filtering import filter_and_create_sheet
 from filtering import fill_column_based_on_filter
-from openpyxl.utils import column_index_from_string
 import constants as c 
 
 def create_filtered_sheets(wb,sheet_config, source_sheet_name):
@@ -111,28 +110,41 @@ def pivot_table_generator():
         'data_field' : [('On Hand','sum')]
     }        
 
-def convert_to_general(wb): 
-    for sheet_name, columns in c.sheets_and_columns.items():
+def convert_to_numeric(wb):
+    """
+    Loops through all sheets in the workbook and converts column values 
+    to numeric types where possible, excluding specific columns.
+
+    Parameters:
+    - wb: openpyxl Workbook object
+    """
+    skip_columns = ['PartNum','Class','Due Date']
+
+    for sheet_name in wb.sheetnames:
+        if sheet_name == 'Sheet1':
+            print(f"Skipping sheet: {sheet_name}")
+            continue
+
         ws = wb[sheet_name]
-        for col_letter in columns:
-            for row in ws.iter_rows(min_col=column_index_from_string(col_letter),
-                                    max_col=column_index_from_string(col_letter),
-                                    min_row=2,
-                                    max_row=ws.max_row):
-                for cell in row:
-                    if cell.value is not None:
-                        cleaned = str(cell.value).strip()
-                        
-                        if cleaned == "":
-                            cell.value = None  # Empty cell, treat as blank
-                        else:
-                            try:
-                                if "." in cleaned:
-                                    cell.value = float(cleaned)
-                                else:
-                                    cell.value = int(cleaned)
-                            except ValueError:
-                                cell.value = cleaned  # fallback if not a number
+        print(f"Processing sheet: {sheet_name}")
+
+        # Get headers from first row
+        headers = [cell.value for cell in ws[1]]
+
+        for col_idx, col_name in enumerate(headers, start=1):
+            if col_name not in skip_columns:
+                for row_idx in range(2, ws.max_row + 1):
+                    cell = ws.cell(row=row_idx, column=col_idx)
+                    try:
+                        if cell.value not in [None, '']:
+                            val = str(cell.value).replace(',', '').strip()
+                            cell.value = float(val)
+                    except ValueError:
+                        continue  # Skip if conversion fails
+
+    print(f"All sheets updated with numeric conversions (excluding {skip_columns}).")
+
+
 
 
 

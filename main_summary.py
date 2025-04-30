@@ -13,7 +13,7 @@ from file_handler import close_excel_with_win32
 
 from helper import create_filtered_sheets
 from helper import summary_sheet_config
-from helper import convert_to_general
+from helper import convert_to_numeric
 
 from data_manipulation import generate_formula_TPR_SUMMARY
 
@@ -30,18 +30,16 @@ def main_summary():
 
     # Prepare TPR Working sheet 
     prepare_working_sheet(main_wb,header_wb,'TPR Working','SummaryHeader',c.COLUMNS_TO_DELETE_SUMMARY_WORKING) # Prepare Working tab with header 
-
     tpr_working_sheet = main_wb['TPR Working']
 
     # Prepare all filtered sheets ('OHS','MO','SO','PO','Forecast','Suggestion')
     create_filtered_sheets(main_wb,summary_sheet_config,'TPR Working')
     create_summary_sheet(main_wb)
+    convert_to_numeric(main_wb)
 
     # Summary sheet 
     summary_sheet = main_wb['Summary']
     
-    convert_to_general(main_wb) # Convert columns to general to be treated as int/float
-
     # Miscellaneous
     copy_header_styles(tpr_working_sheet,main_wb,header_row=1)
     adjust_column_width(main_wb)

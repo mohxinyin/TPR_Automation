@@ -12,9 +12,6 @@ file_path_win32 = r"C:\Users\xinyi.moh\ExcelAutomation\dest\TPR(final).xlsx"
 file_path_summary_win32 = r"C:\Users\xinyi.moh\ExcelAutomation\dest\TPR_SUMMARY(final).xlsx"
 header_path_win32 = r"C:\Users\xinyi.moh\ExcelAutomation\source\TPR HEADER.xlsx"
 
-# File map for TPR 
-path = [file_path_win32,header_path_win32]
-
 # Columns to be deleted 
 COLUMNS_TO_DELETE_WORKING  = [
     "A",  # Single column

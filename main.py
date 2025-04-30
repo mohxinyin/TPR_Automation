@@ -16,6 +16,7 @@ from helper import fill_schedule_values
 from helper import pivot_table_generator
 from helper import create_filtered_sheets
 from helper import tpr_sheet_config
+from helper import convert_to_numeric
 
 from data_manipulation import fill_blank_due_dates
 from data_manipulation import insert_inventory_formula
@@ -36,6 +37,7 @@ def main():
 
     # Working tab 
     prepare_working_sheet(main_wb,header_wb,'Working','Header', c.COLUMNS_TO_DELETE_WORKING) # Prepare Working tab with header 
+    convert_to_numeric(main_wb,'Working')
     working_sheet = main_wb['Working']
 
     # Prepare all filtered sheets 

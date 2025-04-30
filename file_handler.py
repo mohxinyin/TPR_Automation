@@ -3,23 +3,36 @@ from openpyxl import load_workbook
 from win32com.client import gencache
 
 def load_and_convert_csv(input_csv_path, output_excel_path):
-    # Load CSV
-    df = pd.read_csv(input_csv_path, dtype=str)
-    
-    # Convert columns B and M to strings 
-    df.iloc[:, 1] = df.iloc[:, 1].astype(str)  # Column B (index 1)
-    df.iloc[:, 12] = df.iloc[:, 12].astype(str) # Column M (index 12)
+    try:
+        # Load CSV
+        df = pd.read_csv(input_csv_path, dtype=str)
+        
+        # Ensure necessary columns are present
+        required_columns = ['txtDueDate']  # Add any other necessary columns here
+        for col in required_columns:
+            if col not in df.columns:
+                raise ValueError(f"Missing required column: {col}")
+        
+        # Convert columns B and M to strings 
+        df.iloc[:, 1] = df.iloc[:, 1].astype(str)  # Column B (index 1)
+        df.iloc[:, 12] = df.iloc[:, 12].astype(str) # Column M (index 12)
 
-    # Convert txtDueDate to datetime
-    df['txtDueDate'] = pd.to_datetime(df['txtDueDate'], format='%d/%m/%Y', errors='coerce', dayfirst=True)
+        # Convert 'txtDueDate' to datetime
+        df['txtDueDate'] = pd.to_datetime(df['txtDueDate'], format='%d/%m/%Y', errors='coerce', dayfirst=True)
 
-    df.to_excel(output_excel_path,index=False,header=True)
+        # Save to Excel
+        df.to_excel(output_excel_path, index=False, header=True)
 
-    print(df['txtDueDate'].dtype)
-    print(df.dtypes.value_counts())
-    print("CSV converted to Excel")
-
-    return df 
+        # Debugging outputs
+        print(df['txtDueDate'].dtype)
+        print(df.dtypes.value_counts())
+        print("CSV converted to Excel successfully.")
+        
+        return df
+        
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
 
 def load_excel_workbook(file_path):
     """
@@ -57,8 +70,9 @@ def open_excel_with_win32(file_path, visible=False):
         excel.Visible = visible
 
         workbook = excel.Workbooks.Open(file_path)
+        print("Excel workbook loaded with win32 lib")        
         return excel, workbook
-
+    
     except Exception as e:
         print(f"[ERROR] Could not open Excel or workbook: {e}")
         raise
@@ -69,6 +83,7 @@ def close_excel_with_win32(excel, workbook, save=True):
             workbook.Save()
         workbook.Close(False)
         excel.Quit()
+        print("Closed and saved excel workbook")
     except Exception as e:
         print(f"[ERROR] Failed during Excel/workbook cleanup: {e}")
         raise

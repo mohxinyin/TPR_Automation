@@ -1,5 +1,4 @@
 import pandas as pd
-import constants as c 
 
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.utils import column_index_from_string
