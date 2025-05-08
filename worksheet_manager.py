@@ -137,7 +137,7 @@ def create_new_columns(ws, new_headers, after_col_letter = None):
         cell = ws.cell(row=1, column=insert_at)
         cell.value = header
 
-        if ws.title == 'Schedule':
+        if ws.title == 'Schedule' or ws.title == 'Summary':
             cell.font = bold_font  # Apply bold font
 
 def add_year_month_columns(ws, due_date_col=c.due_date_idx):

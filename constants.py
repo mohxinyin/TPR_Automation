@@ -1,9 +1,9 @@
 # CONSTANTS
 
 # Files
-source_file = 'source/20250508_0824H, Time Phase Material Requirement.csv'
+source_file = 'source/20250506_0811H, Time Phase Material Requirement.csv'
 header_file = 'source/TPR HEADER.xlsx' 
-qoh_file = 'source/20250508_0827H, Quantity on hand.xlsx' # Quantity on hand file 
+qoh_file = 'source/20250506_0812H, Quantity on hand.xlsx' # Quantity on hand file 
 dest_file = 'dest/TPR(final).xlsx'
 dest_summary_file = 'dest/TPR_SUMMARY(final).xlsx'
 
@@ -81,12 +81,5 @@ formula_map_summary = {
     '25': "=W{row}=X{row}" # Column X
 }
 
-# Define sheets and columns you need to convert to numeric 
-sheets_and_columns = {
-    "MO": ["A", "N", "O"],
-    "PO": ["A", "N"],
-    "SO": ["A", "O"],
-    "Forecast": ["A", "O"],
-    "Suggestion": ["A", "N"],
-}
+
 

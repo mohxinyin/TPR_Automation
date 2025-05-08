@@ -140,7 +140,7 @@ def convert_to_numeric(wb):
                             val = str(cell.value).replace(',', '').strip()
                             cell.value = float(val)
                     except ValueError:
-                        print (f"Unable to convert {cell.value} to numeric")
+                        continue
 
     print(f"All sheets updated with numeric conversions (excluding {skip_columns}).")
 

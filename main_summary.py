@@ -46,8 +46,7 @@ def main_summary():
     adjust_column_width(main_wb)
     create_new_columns(summary_sheet,c.COLUMNS_TO_ADD_SUMMARY)
     format_due_date(main_wb,c.due_date_idx_summary)
-
-
+    
     main_wb.save(c.dest_summary_file)
 
 ######################### USING WIN32 LIB ########################

@@ -15,4 +15,11 @@ This program generates the Time Phase Material Requirement and Time Phase Materi
 ## **Things to Improve** 
 - Sometimes cache will be corrupted, run **COMfix.py** to clear cache Error msg: \[ERROR] Could not open Excel or workbook: module 'win32com.gen\_py.00020813-0000-0000-C000-000000000046x0x1x9' has no attribute 'CLSIDToClassMap'
 - In the schedule tab, the pivot table is not expanded, have to manually expand 
+- Excel application will pop up when main_summary.py is run 
 
+## **How to run** 
+To run the project, simply execute the following commands:
+
+```bash
+python main.py
+python main_summary.py

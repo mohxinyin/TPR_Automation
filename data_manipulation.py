@@ -1,4 +1,3 @@
-import win32com.client as win32
 import datetime
 import constants as c 
 from worksheet_manager import add_year_month_columns
