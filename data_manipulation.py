@@ -60,7 +60,7 @@ def pivot_table_config(ws, table_range, pivot_table_location, row_field=None, co
         # Get the PivotField for Class
         class_field = pivot_table.PivotFields("Class")
 
-        # Define allowed class values
+        # Filter the pivot table to show only the 01 and 41 classes 
         allowed_classes = ["01", "41"]
 
         # Loop through all items in the Class field
@@ -75,7 +75,7 @@ def pivot_table_config(ws, table_range, pivot_table_location, row_field=None, co
         try:
             pivot_table.ManualUpdate = True
 
-            # Collapse all items under 'Year'
+            # Collapse all items under 'Year' (else everything will be expanded)
             year_field = pivot_table.PivotFields("Year")
             for year_item in year_field.PivotItems():
                 year_item.ShowDetail = False  # Collapse all years
@@ -109,7 +109,7 @@ def pivot_table_config(ws, table_range, pivot_table_location, row_field=None, co
 
     return pivot_table
 
-def write_summary_info(ws,start_cell = 'O1'): # Write summary info for the MRP sheet 
+def write_summary_info(ws,start_cell = 'O1'): # Write summary info for the MRP sheet (Total No. of Parts, Data shown up till...)
     # Get last row of pivot table (assuming it starts at O1)
     start_row = ws.Range(start_cell).Row
     start_col = ws.Range(start_cell).Column
@@ -134,7 +134,7 @@ def write_summary_info(ws,start_cell = 'O1'): # Write summary info for the MRP s
     for col_offset in range(2):
         cell = ws.Cells(summary_row, start_col + col_offset)
         cell.Font.Bold = True
-        cell.Interior.Color = 15773696      
+        cell.Interior.Color = 15773696 # Blue colour     
 
     largest_month = None
     due_date_col = c.due_date_idx
@@ -154,10 +154,6 @@ def write_summary_info(ws,start_cell = 'O1'): # Write summary info for the MRP s
     
 def insert_pt(wb,sheet_name, table_range,pivot_table_location,row_field = None ,column_field = None,data_field = None ,filter_field = None ):
 
-    # excel = gencache.EnsureDispatch("Excel.Application")
-    # excel.Visible = False
-
-    # wb = excel.Workbooks.Open(c.file_path_win32)
     ws = wb.Sheets(sheet_name)
 
     if sheet_name.strip() == 'Schedule':
@@ -179,23 +175,19 @@ def insert_pt(wb,sheet_name, table_range,pivot_table_location,row_field = None ,
         print(type(ws.Range("H2").Value))
         pivot_table_config(ws, table_range, pivot_table_location, row_field, column_field, data_field, filter_field)
 
-    # wb.Save()
-    # wb.Close(False)
-
-    # excel.Quit()
-
     print("Pivot table inserted.")
 
 def fill_blank_due_dates(ws, due_date_col=c.due_date_idx, replacement_date=datetime.datetime(2030, 12, 31)):
     """
-    Replace blank/empty-looking cells in the due date column with 31/12/2030.
+    Replace blank/empty-looking cells in the due date column with 31/12/2030 in the schedule tab.
     """
     updated = False
     for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=due_date_col, max_col=due_date_col):
         cell = row[0]
         cell_val = cell.value
 
-        if cell_val is None or str(cell_val).strip() == '':
+        # Check for any kind of blank: None, "", string with only whitespace, Excel-blank, etc.
+        if cell_val is None or str(cell_val).strip() == '' or str(cell_val) in ['NaT', 'nan']:
             cell.value = replacement_date
             updated = True
 
@@ -203,6 +195,7 @@ def fill_blank_due_dates(ws, due_date_col=c.due_date_idx, replacement_date=datet
         print("Blanks have been set to 31/12/2030 in the schedule tab.")
     else:
         print("No empty cells found in due date column.")
+        print(f"Row {cell.row}: '{cell_val}' (type: {type(cell_val)})")
 
 def write_legend(ws): 
     """
@@ -244,11 +237,6 @@ def write_legend(ws):
     print(f"Legend written at {legend_row},{legend_col}")
 
 def insert_inventory_formula(wb_main,wb_header):
-    # excel = gencache.EnsureDispatch("Excel.Application")
-    # excel.Visible = False
-
-    # wb_main = excel.Workbooks.Open(c.file_path_win32)
-    # wb_header = excel.Workbooks.Open(c.header_path_win32)
 
     ws = wb_main.Sheets('Inventory by WH')
     header_wb_name = wb_header.Name  # e.g. 'TPR HEADER.xlsx'
@@ -263,16 +251,8 @@ def insert_inventory_formula(wb_main,wb_header):
 
     print(f"Area formula(Inventory by WH) pasted")
 
-    # wb_main.Save()
-    # wb_main.Close(False)
-    # wb_header.Close(False)
-
-    # excel.Quit()
-
 def create_TPR_columns(wb):
-    # excel = gencache.EnsureDispatch("Excel.Application")
-    # excel.Visible = False
-    
+
     TPR_sheet = "TPR Inventory"
     Inventory_sheet = "Inventory by WH"
 
@@ -309,29 +289,13 @@ def create_TPR_columns(wb):
             cell.Value = header
             cell.Font.Bold = True  # Bold the header
 
-        # wb.Save()
-        # wb.Close(False)
         print("Column labels appended successfully.")
 
     except Exception as e:
         print(f"Error: {e}")
-    #     if 'wb' in locals():
-    #         wb.Close(False)
-
-    # finally:
-    #     excel.Quit()
 
 def generate_formula_TPR_SUMMARY(wb, sheet_name, formula_map): # Generate formulas for TPR and Summary reports 
-    # try:
-    #     # Create a new Excel instance
-    #     excel = gencache.EnsureDispatch("Excel.Application")
 
-    #     if not excel:
-    #         raise Exception("Excel could not be started")
-
-    #     excel.Visible = False
-
-    #     wb = excel.Workbooks.Open(file_path)
         ws = wb.Sheets(sheet_name)
 
         # Get the last row using the Excel COM method (win32com)
@@ -342,15 +306,14 @@ def generate_formula_TPR_SUMMARY(wb, sheet_name, formula_map): # Generate formul
             for col_index_str, formula_template in formula_map.items():
                 col_index = int(col_index_str)  # Convert string key to integer column index
                 formula = formula_template.format(row=row)
-                ws.Cells(row, col_index).Formula = formula
-
-        # wb.Save()
-        # wb.Close(False)
-        # excel.Quit()
+                try:
+                    ws.Cells(row, col_index).Formula = formula
+                except Exception as e:
+                    print(f"[ERROR] Failed to insert formula at row {row}, col {col_index}: {formula}")
+                    raise
 
         print("Formulas pasted successfully.")
-    # except Exception as e:
-    #     print(f"An error occurred: {e}")
+
 
 
 

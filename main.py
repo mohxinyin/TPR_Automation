@@ -11,6 +11,7 @@ from worksheet_manager import copy_header_styles
 from worksheet_manager import remove_unwanted_columns
 from worksheet_manager import create_new_columns
 from worksheet_manager import import_inventory_sheet
+from worksheet_manager import format_due_date
 
 from helper import fill_schedule_values
 from helper import pivot_table_generator
@@ -37,11 +38,11 @@ def main():
 
     # Working tab 
     prepare_working_sheet(main_wb,header_wb,'Working','Header', c.COLUMNS_TO_DELETE_WORKING) # Prepare Working tab with header 
-    convert_to_numeric(main_wb,'Working')
     working_sheet = main_wb['Working']
 
     # Prepare all filtered sheets 
     create_filtered_sheets(main_wb,tpr_sheet_config,'Working')
+    convert_to_numeric(main_wb)
 
     # MRP tab 
     MRP_sheet = main_wb['MRP']
@@ -60,14 +61,28 @@ def main():
     # Miscellaneous
     copy_header_styles(working_sheet,main_wb,header_row=1)
     remove_unwanted_columns(MRP_sheet,c.COLUMNS_TO_DELETE_MRP)
-    adjust_column_width(main_wb)
+    adjust_column_width(main_wb) # Adjust column width so that everything can be seen clearly 
+    format_due_date(main_wb,c.due_date_idx) # Format due dates to look like dd/mm/yyyy
     main_wb.save(c.dest_file)
 
 ######################### USING WIN32 LIB ########################
 
     # Open excel TPR and Header wb using win32 
-    excel,wb_main = open_excel_with_win32(c.file_path_win32)
-    excel,wb_header = open_excel_with_win32(c.header_path_win32)
+    try:
+        excel, wb_main = open_excel_with_win32(c.file_path_win32)
+    except Exception as e:
+        print(f"Failed to open main workbook: {e}")
+        return
+    
+    try:
+        _, wb_header = open_excel_with_win32(c.header_path_win32)
+    except Exception as e:
+        print(f"Failed to open header workbook: {e}")
+        return
+
+    if wb_header is None:
+        print("Header workbook is None — cannot proceed.")
+        return
 
     # Insert 'Inventory by WH' formula
     insert_inventory_formula(wb_main,wb_header)

@@ -5,6 +5,7 @@ from worksheet_manager import adjust_column_width
 from worksheet_manager import copy_header_styles
 from worksheet_manager import create_summary_sheet
 from worksheet_manager import create_new_columns
+from worksheet_manager import format_due_date
 
 from file_handler import load_and_convert_csv
 from file_handler import load_excel_workbook
@@ -44,6 +45,8 @@ def main_summary():
     copy_header_styles(tpr_working_sheet,main_wb,header_row=1)
     adjust_column_width(main_wb)
     create_new_columns(summary_sheet,c.COLUMNS_TO_ADD_SUMMARY)
+    format_due_date(main_wb,c.due_date_idx_summary)
+
 
     main_wb.save(c.dest_summary_file)
 

@@ -1,9 +1,9 @@
 # CONSTANTS
 
 # Files
-source_file = 'source/TPR(sample).csv'
-header_file = 'source/TPR HEADER.xlsx'
-qoh_file = 'source/QOH.xlsx' # Quantity on hand file 
+source_file = 'source/20250508_0824H, Time Phase Material Requirement.csv'
+header_file = 'source/TPR HEADER.xlsx' 
+qoh_file = 'source/20250508_0827H, Quantity on hand.xlsx' # Quantity on hand file 
 dest_file = 'dest/TPR(final).xlsx'
 dest_summary_file = 'dest/TPR_SUMMARY(final).xlsx'
 
@@ -47,6 +47,7 @@ Inventory_Formula_Range = 'F:F'
 
 # Due Date , year and month column indexes for schedule sheet  
 due_date_idx = 10 
+due_date_idx_summary = 13
 
 #TPR formula 
 formula_map_tpr = {
@@ -55,9 +56,9 @@ formula_map_tpr = {
     '19': "=IFERROR(VLOOKUP($A{row}, 'Inventory by WH'!$O:$T,4,FALSE),0)", # Column S
     '20': "=IFERROR(VLOOKUP($A{row}, 'Inventory by WH'!$O:$T,5,FALSE),0)", # Column T
     '21': "=IFERROR(VLOOKUP($A{row}, 'Inventory by WH'!$O:$T,6,FALSE),0)", # Column U
-    '22': "=IFERROR(--(U{row}=K{row}), FALSE)", # Column V
+    '22': "=IFERROR(U{row}=K{row}, FALSE)", # Column V
     '23': "=SUM(Q{row}:U{row})", # Column W
-    '24': "=IFERROR(--(K{row}=W{row}), FALSE)" # Column X
+    '24': "=IFERROR(K{row}=W{row}, FALSE)" # Column X
 }
 
 #TPR Summary formula 
@@ -80,7 +81,7 @@ formula_map_summary = {
     '25': "=W{row}=X{row}" # Column X
 }
 
-# Define sheets and columns you need to fix
+# Define sheets and columns you need to convert to numeric 
 sheets_and_columns = {
     "MO": ["A", "N", "O"],
     "PO": ["A", "N"],

@@ -2,7 +2,7 @@ from filtering import filter_and_create_sheet
 from filtering import fill_column_based_on_filter
 import constants as c 
 
-def create_filtered_sheets(wb,sheet_config, source_sheet_name):
+def create_filtered_sheets(wb,sheet_config, source_sheet_name): # Helper function to filter and create sheets 
     for config in sheet_config():
         filter_and_create_sheet(
             wb=wb,
@@ -77,7 +77,7 @@ def summary_sheet_config():
 
 def fill_schedule_values(ws):
     # MRP
-    fill_column_based_on_filter(ws,'Q', lambda val: 'MRP' in val.upper()) # Start from Q because of the 2 extra columns added ("year" and "month" columns)
+    fill_column_based_on_filter(ws,'Q', lambda val: 'MRP' in val.upper()) # Start from Q because of the 2 extra columns added ("year" and "month" columns) in schedule tab
     # MO
     fill_column_based_on_filter(ws,'R', lambda val: val.startswith('Job') and 'MRP' not in val.upper())
     # Expedite
@@ -140,7 +140,7 @@ def convert_to_numeric(wb):
                             val = str(cell.value).replace(',', '').strip()
                             cell.value = float(val)
                     except ValueError:
-                        continue  # Skip if conversion fails
+                        print (f"Unable to convert {cell.value} to numeric")
 
     print(f"All sheets updated with numeric conversions (excluding {skip_columns}).")
 

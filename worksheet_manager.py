@@ -59,8 +59,8 @@ def remove_unwanted_columns(ws, cols_to_delete):
     print("Selected columns removed.")
 
     if ws.title == 'Working' or ws.title == "TPR Working":
-        ws.delete_rows(1)
-        print("Top row removed.")
+        ws.delete_rows(1) # Remove first row from working sheets 
+        print("Top row removed from working sheet.")
 
 def adjust_column_width(wb):
     # Make sure all values are visible --> adjust width of column to max length and freeze top row
@@ -224,6 +224,17 @@ def create_summary_sheet(wb):
     # Rename column H to 'On-hand Stock'
     summary_ws['H1'].value = 'On-hand Stock'
     return wb
+
+def format_due_date(wb,due_date_idx):
+    for ws in wb.worksheets:
+        if ws.title == 'Summary':
+            continue
+        # Apply 'DD/MM/YYYY' format to all rows in column J('Due Date')
+        for row in ws.iter_rows(min_row=2, min_col=due_date_idx, max_col=due_date_idx):
+            for cell in row:
+                cell.number_format = 'DD/MM/YYYY'
+
+
 
 
             

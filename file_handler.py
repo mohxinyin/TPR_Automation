@@ -56,7 +56,6 @@ def load_excel_workbook(file_path):
 def open_excel_with_win32(file_path, visible=False):
     """
     Opens Excel and a single workbook using win32com.
-    Automatically handles corrupted gen_py cache.
     
     Args:
         file_path (str): Path to the Excel file.
@@ -68,6 +67,11 @@ def open_excel_with_win32(file_path, visible=False):
     try:
         excel = gencache.EnsureDispatch("Excel.Application")
         excel.Visible = visible
+        excel.EnableEvents = False
+        excel.ScreenUpdating = False
+
+        if not visible:
+            excel.WindowState = -4140  # Minimize if still trying to show
 
         workbook = excel.Workbooks.Open(file_path)
         print("Excel workbook loaded with win32 lib")        
