@@ -1,6 +1,6 @@
-import datetime
 import constants as c 
 from worksheet_manager import add_year_month_columns
+from datetime import datetime 
 
 def add_pivot_field(pivot_table, field, orientation, position):
     """Helper function to add a field to the pivot table with specified orientation and position."""
@@ -71,22 +71,27 @@ def pivot_table_config(ws, table_range, pivot_table_location, row_field=None, co
                     item.Visible = False
                 except:
                     print(f"Could not hide item: {item.Name}")    
+                    
+        # Get current year and month
+        current_year = str(datetime.now().year)
+        current_month = datetime.now().strftime("%B")  # Example: 'May'
+
         try:
             pivot_table.ManualUpdate = True
 
-            # Collapse all items under 'Year' (else everything will be expanded)
+            # Collapse/Expand 'Year' field
             year_field = pivot_table.PivotFields("Year")
             for year_item in year_field.PivotItems():
-                year_item.ShowDetail = False  # Collapse all years
+                year_item.ShowDetail = (year_item.Name == current_year)  # Expand only current year
 
-            # Collapse all items under 'Month'
+            # Collapse/Expand 'Month' field
             month_field = pivot_table.PivotFields("Month")
             for month_item in month_field.PivotItems():
-                month_item.ShowDetail = False  # Collapse all months
+                month_item.ShowDetail = (month_item.Name == current_month)  # Expand only current month
 
             pivot_table.ManualUpdate = False
         except Exception as e:
-            print(f"Error collapsing pivot levels: {e}")
+            print(f"Error collapsing/expanding pivot levels: {e}")
 
     if ws.Name == 'Inventory by WH':
         try:
@@ -141,7 +146,7 @@ def write_summary_info(ws,start_cell = 'O1'): # Write summary info for the MRP s
     for i in range(2, last_row + 1):
         val = ws.Cells(i, due_date_col).Value  # Column I
 
-        if isinstance(val, datetime.datetime):
+        if isinstance(val, datetime):
             if largest_month is None or val > largest_month:
                 largest_month = val
         #print(ws.Cells(i, 9).Value, type(ws.Cells(i, 9).Value))
@@ -176,7 +181,7 @@ def insert_pt(wb,sheet_name, table_range,pivot_table_location,row_field = None ,
 
     print("Pivot table inserted.")
 
-def fill_blank_due_dates(ws, due_date_col=c.due_date_idx, replacement_date=datetime.datetime(2030, 12, 31)):
+def fill_blank_due_dates(ws, due_date_col=c.due_date_idx, replacement_date=datetime(2030, 12, 31)):
     """
     Replace blank/empty-looking cells in the due date column with 31/12/2030 in the schedule tab.
     """

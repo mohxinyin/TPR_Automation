@@ -1,6 +1,7 @@
 from filtering import filter_and_create_sheet
 from filtering import fill_column_based_on_filter
 import constants as c 
+import pandas as pd 
 
 def create_filtered_sheets(wb,sheet_config, source_sheet_name): # Helper function to filter and create sheets 
     for config in sheet_config():
@@ -12,14 +13,20 @@ def create_filtered_sheets(wb,sheet_config, source_sheet_name): # Helper functio
         )
 
 def tpr_sheet_config():
-    yield {
-        "name": "MRP",
-        "filters": [
+    def mrp_filters(df):
+        if 'Due Date' in df.columns:
+            df['Due Date'] = pd.to_datetime(df['Due Date'], errors='coerce', dayfirst=True)
+        return [
             lambda df: df['Source'].str.contains('MRP', na=False, case=False),
             lambda df: df['Due Date'].dt.year == 2025,
             lambda df: df['Receipts'].notna() & (df['Receipts'].str.strip() != '')
         ]
+
+    yield {
+        "name": "MRP",
+        "filters": mrp_filters
     }
+
     yield {
         "name": "Schedule",
         "filters": [
@@ -28,13 +35,16 @@ def tpr_sheet_config():
             lambda df: df['Receipts'].notna() & (df['Receipts'].str.strip() != '')
         ]
     }
+
     yield {
         "name": "TPR Inventory",
         "filters": [
             lambda df: df['Source'].str.contains('On-Hand Quantity', na=False, case=False)
         ]
     }
+
     print("Filtered sheets created")
+
 
 def summary_sheet_config():
     yield {

@@ -27,7 +27,7 @@ from data_manipulation import generate_formula_TPR_SUMMARY
 
 def main():
 
-######################### USING OPENPYXL ########################
+######################### USING OPENPYXL ############################
 
     # Convert csv to excel file 
     load_and_convert_csv(c.source_file,c.dest_file)
@@ -65,7 +65,7 @@ def main():
     format_due_date(main_wb,c.due_date_idx) # Format due dates to look like dd/mm/yyyy
     main_wb.save(c.dest_file)
 
-######################### USING WIN32 LIB ########################
+######################### USING WIN32 LIB ###############################
 
     # Open excel TPR and Header wb using win32 
     try:

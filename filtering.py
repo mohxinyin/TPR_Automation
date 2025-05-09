@@ -20,6 +20,11 @@ def filter_and_create_sheet(wb, filters, output_sheet_name, source_sheet_name):
     cols = next(data)
     df = pd.DataFrame(data, columns=cols)
 
+    
+    # If filters is a callable, get actual filters
+    if callable(filters):
+        filters = filters(df)
+
     # Apply filters
     for condition in filters:
         df = df[condition(df)]
