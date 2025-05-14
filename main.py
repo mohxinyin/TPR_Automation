@@ -92,7 +92,7 @@ def main():
         insert_pt(wb_main,**config)
 
     create_TPR_columns(wb_main)
-    generate_formula_TPR_SUMMARY(wb_main,'TPR Inventory',c.formula_map_tpr) # generate formulas for the tpr inventory and summary sheets
+    generate_formula_TPR_SUMMARY(wb_main,'TPR Inventory',c.formula_map_tpr) # Generate formulas for the tpr inventory and summary sheets
 
     # Save and close excel wb 
     close_excel_with_win32(excel,wb_main) 

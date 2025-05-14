@@ -1,18 +1,26 @@
+import os 
 # CONSTANTS
 
 # Source files
-source_file = 'source/20250428_0810H, Time Phase Material Requirement.csv'
+source_file = 'source/20250514_0810H, Time Phase Material Requirement.csv'
 header_file = 'source/TPR HEADER.xlsx' 
-qoh_file = 'source/20250428_0811H, Quantity on hand.xlsx' # Quantity on hand file 
+qoh_file = 'source/20250514_0811H, Quantity on hand.xlsx' # Quantity on hand file 
+
+# Extract base name without extension
+base_name = os.path.splitext(os.path.basename(source_file))[0] # Extracts the final componenet of the path 
 
 # Dest files 
-dest_file = 'dest/TPR(final).xlsx'
-dest_summary_file = 'dest/TPR_SUMMARY(final).xlsx'
+# dest_file = 'dest/TPR(final).xlsx'
+# dest_summary_file = 'dest/TPR_SUMMARY(final).xlsx'
 
-# Files for win32 library
-file_path_win32 = r"C:\Users\xinyi.moh\ExcelAutomation\dest\TPR(final).xlsx"
-file_path_summary_win32 = r"C:\Users\xinyi.moh\ExcelAutomation\dest\TPR_SUMMARY(final).xlsx"
-header_path_win32 = r"C:\Users\xinyi.moh\ExcelAutomation\source\TPR HEADER.xlsx"
+# Generate destination file name
+dest_file = f"dest/{base_name}.xlsx"
+dest_summary_file = f"dest/{base_name} Summary.xlsx"
+
+# Files for win32 library (has to be the absolute file path)
+file_path_win32 = fr"C:\Users\xinyi.moh\Programs\ExcelAutomation\dest\{base_name}.xlsx" 
+file_path_summary_win32 = fr"C:\Users\xinyi.moh\Programs\ExcelAutomation\dest\{base_name} Summary.xlsx"
+header_path_win32 = r"C:\Users\xinyi.moh\Programs\ExcelAutomation\source\TPR HEADER.xlsx"
 
 # Columns to be deleted 
 COLUMNS_TO_DELETE_WORKING  = [
@@ -32,7 +40,7 @@ COLUMNS_TO_DELETE_SUMMARY_WORKING = [
     *[f"B{chr(c)}" for c in range(ord("D"), ord("K"))]  # BD to BJ
 ]
 COLUMNS_TO_DELETE_MRP = ['L', 'M', 'N', 'O','P']
-COLUMNS_TO_DELETE_SCHEDULE = ['U','V']
+COLUMNS_TO_DELETE_SCHEDULE = ['U','V'] # Year and Month columns 
 
 # Columns to be added 
 COLUMNS_TO_ADD_SCHEDULE = ['MRP','MO','EXPEDITE','POSTPONE']

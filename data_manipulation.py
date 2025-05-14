@@ -1,6 +1,7 @@
 import constants as c 
 from worksheet_manager import add_year_month_columns
 from datetime import datetime 
+import calendar
 
 def add_pivot_field(pivot_table, field, orientation, position):
     """Helper function to add a field to the pivot table with specified orientation and position."""
@@ -11,7 +12,7 @@ def add_pivot_field(pivot_table, field, orientation, position):
 def pivot_table_config(ws, table_range, pivot_table_location, row_field=None, column_field = None, data_field=None, filter_field=None):
     wb = ws.Parent # Get the workbook from worksheet
 
-    AGGREGATION_FUNCTIONS = {
+    AGGREGATION_FUNCTIONS = {      
         'sum': -4157,       # xlSum
         'count': -4112,     # xlCount
     }
@@ -56,6 +57,7 @@ def pivot_table_config(ws, table_range, pivot_table_location, row_field=None, co
             pivot_table.AddDataField(pf, f"Count of {field_name}", agg_func_code)
     
     if ws.Name == 'Schedule':
+
         # Get the PivotField for Class
         class_field = pivot_table.PivotFields("Class")
 
@@ -92,6 +94,7 @@ def pivot_table_config(ws, table_range, pivot_table_location, row_field=None, co
             pivot_table.ManualUpdate = False
         except Exception as e:
             print(f"Error collapsing/expanding pivot levels: {e}")
+        highlight_count_of_mo(pivot_table)
 
     if ws.Name == 'Inventory by WH':
         try:
@@ -112,6 +115,72 @@ def pivot_table_config(ws, table_range, pivot_table_location, row_field=None, co
             print(f"Error accessing the Column Labels: {e}")
 
     return pivot_table
+
+def highlight_count_of_mo(pivot_table):
+    today = datetime.today().date()
+    table_range = pivot_table.TableRange1
+
+    if table_range is None:
+        print("No data found in the pivot table.")
+        return
+
+    header_row = table_range.Rows(1)
+    count_mo_col_index = None
+
+    # Find the column index of "Count of MO"
+    for col in range(1, table_range.Columns.Count + 1):
+        if header_row.Cells(1, col).Value == "Count of MO":
+            count_mo_col_index = col
+            break
+
+    if not count_mo_col_index:
+        print("Could not find 'Count of MO' column.")
+        return
+    
+    # Prepare month abbreviation lookup (e.g., "jan" -> 1)
+    month_abbr = {month.lower(): idx for idx, month in enumerate(calendar.month_abbr) if month}
+
+    # Iterate through the rows 
+    for row in range(2, table_range.Rows.Count + 1):  # Skip header row
+        try:
+            cell = table_range.Cells(row, 1)  # Date-level row label
+            val = cell.Value
+
+            highlight = False
+            cell_date = None
+
+            if isinstance(val, datetime):
+                # It's a full date
+                cell_date = val.date()
+                if cell_date <= today:
+                    highlight = True
+
+            # Year as number or string
+            elif isinstance(val, (int, float)):
+                if int(val) < today.year:
+                    highlight = True
+
+            elif isinstance(val, str) and val.isdigit():
+                if int(val) < today.year:
+                    highlight = True
+
+            # Abbreviated month name
+            elif isinstance(val, str):
+                val_clean = val.strip().lower()
+                if val_clean in month_abbr:
+                    month_num = month_abbr[val_clean]
+                    if (today.year > 1900) and (month_num < today.month):
+                        highlight = True
+
+            if highlight:
+                mo_cell = table_range.Cells(row, count_mo_col_index)
+                mo_cell.Interior.Color = 65535  # Yellow
+                print(f"Highlighted: Row {row}, Label: {val}, MO: {mo_cell.Value}")
+
+        except Exception as e:
+            print(f"[Warning] Skipping row {row} — {e}")
+
+    print("Dates, months, and years before today have been highlighted.")
 
 def write_summary_info(ws,start_cell = 'O1'): # Write summary info for the MRP sheet (Total No. of Parts, Data shown up till...)
     # Get last row of pivot table (assuming it starts at O1)
@@ -155,31 +224,49 @@ def write_summary_info(ws,start_cell = 'O1'): # Write summary info for the MRP s
     if largest_month: 
         ws.Cells(summary_row + 2, start_col).Value = f"Data shown up till {largest_month.strftime('%b %Y')}"
         ws.Cells(summary_row + 2, start_col).Font.Bold = True
-    
-def insert_pt(wb,sheet_name, table_range,pivot_table_location,row_field = None ,column_field = None,data_field = None ,filter_field = None ):
 
-    ws = wb.Sheets(sheet_name)
+def insert_pt(wb, sheet_name, table_range, pivot_table_location,
+              row_field=None, column_field=None, data_field=None, filter_field=None):
+    try:
+        ws = wb.Sheets(sheet_name)
+        sheet_clean = sheet_name.strip().lower() # Makes sure the names match even if there is leading/trailing whitespace or the casing differs 
+        print(f"[INFO] Processing sheet: '{sheet_clean}'")
 
-    if sheet_name.strip() == 'Schedule':
-        add_year_month_columns(ws)
-        pivot_table_config(ws, table_range, pivot_table_location, row_field, column_field, data_field, filter_field)
-        for col_idx in sorted(c.COLUMNS_TO_DELETE_SCHEDULE, reverse=True):
-            ws.Columns(col_idx).Delete()
-        write_legend(ws)
+        if sheet_clean == 'schedule':
+            try:
+                add_year_month_columns(ws)
+                pivot_table_config(ws, table_range, pivot_table_location,
+                                   row_field, column_field, data_field, filter_field)
+                for col_idx in sorted(c.COLUMNS_TO_DELETE_SCHEDULE, reverse=True):
+                    ws.Columns(col_idx).Delete()
+                write_legend(ws)
+                print("[SUCCESS] Schedule pivot table inserted successfully.")
+            except Exception as e:
+                print(f"[ERROR] Failed to insert Schedule pivot table: {e}")
 
-    if sheet_name.strip() == 'MRP':
-        pivot_table_config(ws, table_range, pivot_table_location, row_field, column_field, data_field, filter_field)
-        write_summary_info(ws, pivot_table_location) # write summary info if its MRP sheet 
-        print("Summary info written in mrp sheet.")
+        elif sheet_clean == 'mrp':
+            try:
+                pivot_table_config(ws, table_range, pivot_table_location,
+                                   row_field, column_field, data_field, filter_field)
+                write_summary_info(ws, pivot_table_location)
+                print("[SUCCESS] MRP pivot table and summary info inserted.")
+            except Exception as e:
+                print(f"[ERROR] Failed to insert MRP pivot table: {e}")
 
-    if sheet_name.strip() == "Inventory by WH":
-        ws.Columns(1).Delete()
-        col_H = ws.Cells(1,8)
-        print(col_H)
-        print(type(ws.Range("H2").Value))
-        pivot_table_config(ws, table_range, pivot_table_location, row_field, column_field, data_field, filter_field)
+        elif sheet_clean == 'inventory by wh':
+            try:
+                ws.Columns(1).Delete()
+                pivot_table_config(ws, table_range, pivot_table_location,
+                                   row_field, column_field, data_field, filter_field)
+                print("[SUCCESS] Inventory by WH pivot table inserted.")
+            except Exception as e:
+                print(f"[ERROR] Failed to insert Inventory by WH pivot table: {e}")
 
-    print("Pivot table inserted.")
+        else:
+            print(f"[WARNING] Unrecognized sheet name: '{sheet_name}' — skipping pivot table insertion.")
+
+    except Exception as e:
+        print(f"[FATAL ERROR] Could not access sheet '{sheet_name}': {e}")
 
 def fill_blank_due_dates(ws, due_date_col=c.due_date_idx, replacement_date=datetime(2030, 12, 31)):
     """
