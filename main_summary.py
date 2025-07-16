@@ -1,4 +1,5 @@
 import constants as c
+import shutil
 
 from worksheet_manager import prepare_working_sheet
 from worksheet_manager import adjust_column_width
@@ -6,6 +7,7 @@ from worksheet_manager import copy_header_styles
 from worksheet_manager import create_summary_sheet
 from worksheet_manager import create_new_columns
 from worksheet_manager import format_due_date
+from worksheet_manager import empty_folder
 
 from file_handler import load_and_convert_csv
 from file_handler import load_excel_workbook
@@ -23,11 +25,17 @@ def main_summary():
 ######################### USING OPENPYXL ########################
 
     # Convert csv to excel file 
-    load_and_convert_csv(c.source_file,c.dest_summary_file)
+    #load_and_convert_csv(c.source_file,c.dest_summary_file)
+
+    # Duplicate the excel file and place in another folder  
+    shutil.copyfile(c.source_file, c.dest_summary_file)
 
     # Load workbooks 
     main_wb = load_excel_workbook(c.dest_summary_file)
     header_wb = load_excel_workbook(c.header_file)
+
+    # Rename the first sheet 
+    main_wb.active.title = "Sheet 1"
 
     # Prepare TPR Working sheet 
     prepare_working_sheet(main_wb,header_wb,'TPR Working','SummaryHeader',c.COLUMNS_TO_DELETE_SUMMARY_WORKING) # Prepare Working tab with header 
@@ -45,7 +53,7 @@ def main_summary():
     copy_header_styles(tpr_working_sheet,main_wb,header_row=1)
     adjust_column_width(main_wb)
     create_new_columns(summary_sheet,c.COLUMNS_TO_ADD_SUMMARY)
-    format_due_date(main_wb,c.due_date_idx_summary)
+    format_due_date(main_wb,c.due_date_idx_summary_cols)
     
     main_wb.save(c.dest_summary_file)
 
@@ -59,6 +67,9 @@ def main_summary():
 
     # Save and close excel wb 
     close_excel_with_win32(excel,wb)
+
+    # Empty folder 
+    empty_folder()
 
 if __name__ == "__main__":
     main_summary()

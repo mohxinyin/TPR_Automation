@@ -399,6 +399,7 @@ def generate_formula_TPR_SUMMARY(wb, sheet_name, formula_map): # Generate formul
                 formula = formula_template.format(row=row)
                 try:
                     ws.Cells(row, col_index).Formula = formula
+                    print(f"Pasted formula at Row {row}, Column {col_index}: {formula}")
                 except Exception as e:
                     print(f"[ERROR] Failed to insert formula at row {row}, col {col_index}: {formula}")
                     raise

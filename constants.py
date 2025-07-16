@@ -1,26 +1,22 @@
 import os 
-# CONSTANTS
 
+# CONSTANTS
 # Source files
-source_file = 'source/20250514_0810H, Time Phase Material Requirement.csv'
-header_file = 'source/TPR HEADER.xlsx' 
-qoh_file = 'source/20250514_0811H, Quantity on hand.xlsx' # Quantity on hand file 
+source_file = 'source/tpr.xlsx'
+header_file = 'TPR HEADER.xlsx' 
+qoh_file = 'source/qoh.xlsx' # Quantity on hand file 
 
 # Extract base name without extension
 base_name = os.path.splitext(os.path.basename(source_file))[0] # Extracts the final componenet of the path 
-
-# Dest files 
-# dest_file = 'dest/TPR(final).xlsx'
-# dest_summary_file = 'dest/TPR_SUMMARY(final).xlsx'
 
 # Generate destination file name
 dest_file = f"dest/{base_name}.xlsx"
 dest_summary_file = f"dest/{base_name} Summary.xlsx"
 
 # Files for win32 library (has to be the absolute file path)
-file_path_win32 = fr"C:\Users\xinyi.moh\Programs\ExcelAutomation\dest\{base_name}.xlsx" 
-file_path_summary_win32 = fr"C:\Users\xinyi.moh\Programs\ExcelAutomation\dest\{base_name} Summary.xlsx"
-header_path_win32 = r"C:\Users\xinyi.moh\Programs\ExcelAutomation\source\TPR HEADER.xlsx"
+file_path_win32 = fr"C:\Users\xinyi.moh\Programs\ExcelAutomation - Copy\dest\{base_name}.xlsx" 
+file_path_summary_win32 = fr"C:\Users\xinyi.moh\Programs\ExcelAutomation - Copy\dest\{base_name} Summary.xlsx"
+header_path_win32 = r"C:\Users\xinyi.moh\Programs\ExcelAutomation - Copy\TPR HEADER.xlsx"
 
 # Columns to be deleted 
 COLUMNS_TO_DELETE_WORKING  = [
@@ -49,6 +45,10 @@ COLUMNS_TO_ADD_TPR = ['Delta','Total','Delta2']
 COLUMNS_TO_COPY_SUMMARY = [1, 2, 3, 4, 5, 6, 7, 16] # Columns A to G and P 
 COLUMNS_TO_ADD_SUMMARY = ['MO','PO','SO','Forecast','MO Comp','Available','Available with MRP','MRP','MRP Comp','Suggestion','Demand','Supply']
 
+# Columns to be added/copied (Overview)
+COLUMNS_TO_COPY_OVERVIEW = [1, 2, 3, 4, 5, 6,11] # Columns A to F and K
+COLUMNS_TO_ADD_OVERVIEW = ['SO','Forecast','MO','MO Comp','MRP','MRP Comp','PO','Suggestion','Insp','Proj','Chk','Chk2','Cat','Std Cost','Value','On Hand','W/o MRP/Suggestion','Cat2','Value2','On Hand','Inventory']
+
 # Table ranges 
 MRP_Table_Range = 'MRP!$A:$K' 
 Schedule_Table_Range = 'Schedule!$A:$V'
@@ -58,14 +58,16 @@ Inventory_Formula_Range = 'F:F'
 # Due Date , year and month column indexes for schedule sheet  
 due_date_idx = 10 
 due_date_idx_summary = 13
+due_date_cols = [8,10]
+due_date_idx_summary_cols = [10,13]
 
 #TPR formula 
 formula_map_tpr = {
-    '17': "=IFERROR(VLOOKUP($A{row}, 'Inventory by WH'!$O:$T,2,FALSE),0)", # Column Q
-    '18': "=IFERROR(VLOOKUP($A{row}, 'Inventory by WH'!$O:$T,3,FALSE),0)", # Column R
-    '19': "=IFERROR(VLOOKUP($A{row}, 'Inventory by WH'!$O:$T,4,FALSE),0)", # Column S
-    '20': "=IFERROR(VLOOKUP($A{row}, 'Inventory by WH'!$O:$T,5,FALSE),0)", # Column T
-    '21': "=IFERROR(VLOOKUP($A{row}, 'Inventory by WH'!$O:$T,6,FALSE),0)", # Column U
+    '17': "=IFERROR(VLOOKUP($A{row}, 'Inventory by WH'!$S:$X,2,FALSE),0)", # Column Q
+    '18': "=IFERROR(VLOOKUP($A{row}, 'Inventory by WH'!$S:$X,3,FALSE),0)", # Column R
+    '19': "=IFERROR(VLOOKUP($A{row}, 'Inventory by WH'!$S:$X,4,FALSE),0)", # Column S
+    '20': "=IFERROR(VLOOKUP($A{row}, 'Inventory by WH'!$S:$X,5,FALSE),0)", # Column T
+    '21': "=IFERROR(VLOOKUP($A{row}, 'Inventory by WH'!$S:$X,6,FALSE),0)", # Column U
     '22': "=IFERROR(U{row}=K{row}, FALSE)", # Column V
     '23': "=SUM(Q{row}:U{row})", # Column W
     '24': "=IFERROR(K{row}=W{row}, FALSE)" # Column X
@@ -91,5 +93,27 @@ formula_map_summary = {
     '25': "=W{row}=X{row}" # Column X
 }
 
+#TPR Overview formula 
+formula_map_overview = {
+    '8': "=IFERROR(SUMIFS(SO!L:L,SO!A:A,Overview!A{row}),0)", # Column I (SO)
+    '9': "=IFERROR(SUMIFS(Forecast!L:L,Forecast!A:A,Overview!A{row}),0)", # Column L (Forecast)
+    '10': '=IFERROR(SUMIFS(MO!$K:$K,MO!$A:$A,Overview!$A{row},MO!$I:$I,"<>Job: MRP*"),0)', # Column I (MO)
+    '11': '=IFERROR(SUMIFS(MO!$L:$L,MO!$A:$A,Overview!$A{row},MO!$I:$I,"<>Job: MRP*"),0)', # Column M (MO Comp)
+    '12': '=IFERROR(SUMIFS(MO!$K:$K,MO!$A:$A,Overview!$A{row},MO!$I:$I,"=Job: MRP*"),0)' ,# Column P (MRP)
+    '13': '=IFERROR(SUMIFS(MO!$L:$L,MO!$A:$A,Overview!$A{row},MO!$I:$I,"=Job: MRP*"),0)', # Column Q (MRP Comp)
+    '14': "=IFERROR(SUMIFS(PO!K:K,PO!A:A,Overview!A{row}),0)", # Column J (PO)
+    '15': "=IFERROR(SUMIFS(Suggestion!K:K,Suggestion!A:A,Overview!A{row}),0)", # Column R (Suggestion)
+    '16': "=IFERROR(SUMIFS(Inspection!K:K,Inspection!A:A,Overview!A{row}),0)", # Column P (Inspection)
+    '18': "=N(G{row})-N(H{row})-N(I{row})+N(J{row})-N(K{row})+N(L{row})-N(M{row})+N(N{row})+N(O{row})+N(P{row})", # Column R (Chk)
+    '19': '=IF(ABS(Q{row}-R{row})<0.00001, TRUE, FALSE)', # Column S (Chk2)
+    '20': '=IF(R{row}>0, "Excess", IF(R{row}=0, "ok", "Shortage"))', # Column T (Cat)
+    '22': "=R{row}*U{row}", # Column V (Value)
+    '23': "=MIN(G{row},R{row})*U{row}", # Column W (On Hand)
+    '24': "=N(G{row})-N(H{row})-N(I{row})+N(J{row})-N(K{row})+N(N{row})+N(P{row})", # Column X (W/o MRP/Suggestion)
+    '25': '=IF(X{row}>0, "Excess", IF(X{row}=0, "ok", "Shortage"))', # Column Y (Cat2)
+    '26': '=X{row}*U{row}', # Column Z (Value2)
+    '27': "=MIN(G{row},X{row})*U{row}", # Column AA (On Hand)
+    '28': "= G{row}*U{row}" # Column AB (Inventory)
+}
 
 

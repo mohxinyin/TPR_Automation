@@ -1,4 +1,5 @@
 import pandas as pd  
+import constants as c 
 from openpyxl import load_workbook
 from win32com.client import gencache
 
@@ -30,6 +31,10 @@ def load_and_convert_csv(input_csv_path, output_excel_path):
         
         return df
         
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+
     except Exception as e:
         print(f"An error occurred: {e}")
         return None

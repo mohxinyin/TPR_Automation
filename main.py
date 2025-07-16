@@ -1,4 +1,5 @@
 import constants as c
+import shutil
 
 from file_handler import load_and_convert_csv
 from file_handler import load_excel_workbook
@@ -25,16 +26,30 @@ from data_manipulation import insert_pt
 from data_manipulation import create_TPR_columns
 from data_manipulation import generate_formula_TPR_SUMMARY
 
+from overview import create_overview_sheet
+
+from api_handler import update_excel_with_standard_cost
+
+from COMfix import clear_cache
+
 def main():
 
+    clear_cache()
+    
 ######################### USING OPENPYXL ############################
 
     # Convert csv to excel file 
-    load_and_convert_csv(c.source_file,c.dest_file)
+    #load_and_convert_csv(c.source_file,c.dest_file)
+
+    # Duplicate the excel file and place in another folder  
+    shutil.copyfile(c.source_file, c.dest_file)
 
     # Load workbooks 
     main_wb = load_excel_workbook(c.dest_file)
     header_wb = load_excel_workbook(c.header_file)
+
+    # Rename the first sheet 
+    main_wb.active.title = "Sheet 1"
 
     # Working tab 
     prepare_working_sheet(main_wb,header_wb,'Working','Header', c.COLUMNS_TO_DELETE_WORKING) # Prepare Working tab with header 
@@ -58,14 +73,18 @@ def main():
     inventory_sheet = main_wb['Inventory by WH']
     create_new_columns(inventory_sheet,c.COLUMN_TO_ADD_WH,'E')
 
+    # Create overview sheet 
+    create_overview_sheet(main_wb)
+    #update_excel_with_standard_cost(main_wb,c.dest_file)
+
     # Miscellaneous
     copy_header_styles(working_sheet,main_wb,header_row=1)
     remove_unwanted_columns(MRP_sheet,c.COLUMNS_TO_DELETE_MRP)
     adjust_column_width(main_wb) # Adjust column width so that everything can be seen clearly 
-    format_due_date(main_wb,c.due_date_idx) # Format due dates to look like dd/mm/yyyy
+    format_due_date(main_wb,c.due_date_cols) # Format due dates to look like dd/mm/yyyy
     main_wb.save(c.dest_file)
 
-######################### USING WIN32 LIB ###############################
+# ######################### USING WIN32 LIB ###############################
 
     # Open excel TPR and Header wb using win32 
     try:
@@ -92,7 +111,8 @@ def main():
         insert_pt(wb_main,**config)
 
     create_TPR_columns(wb_main)
-    generate_formula_TPR_SUMMARY(wb_main,'TPR Inventory',c.formula_map_tpr) # Generate formulas for the tpr inventory and summary sheets
+    generate_formula_TPR_SUMMARY(wb_main,'TPR Inventory',c.formula_map_tpr) # Generate formulas for the tpr inventory 
+    generate_formula_TPR_SUMMARY(wb_main,'Overview',c.formula_map_overview) # Generate formulas for the tpr inventory 
 
     # Save and close excel wb 
     close_excel_with_win32(excel,wb_main) 

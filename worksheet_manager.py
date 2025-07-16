@@ -1,12 +1,13 @@
 import constants as c
 import datetime
+import os
 from copy import copy
 from openpyxl.utils import column_index_from_string
 from openpyxl.styles import Font
 from openpyxl.styles import PatternFill
 from file_handler import load_excel_workbook
 
-def prepare_working_sheet(wb, header_wb, new_sheet_name, header_sheet_name, cols_to_delete, source_sheet_name = "Sheet1" ):
+def prepare_working_sheet(wb, header_wb, new_sheet_name, header_sheet_name, cols_to_delete, source_sheet_name = "Sheet 1" ):
     """
     Takes an openpyxl Workbook object, copies a sheet, hides the original,
     renames the copy, and adds a styled header from another workbook.
@@ -96,7 +97,7 @@ def copy_header_styles(styled_ws, wb,header_row):
     for sheet_name in wb.sheetnames:
         green_fill = PatternFill(start_color="A9D08E", end_color="A9D08E", fill_type="solid")
         # Skip the sheet named 'Sheet1' and 'Inventory by WH'
-        if sheet_name in ['Sheet1','Inventory by WH','Summary']:
+        if sheet_name in ['Sheet1','Inventory by WH','Summary','Overview']:
             continue
 
         sheet = wb[sheet_name]  # Access each sheet by name
@@ -130,7 +131,10 @@ def create_new_columns(ws, new_headers, after_col_letter = None):
             insert_at = last_col_idx + i + 1
 
         # Skip an additional column after 'Suggestion' in the Summary sheet 
-        if header == 'Suggestion':  # When 'Suggestion' column is reached, skip the next column
+        if ws.title == 'Summary' and header == 'Suggestion':  # When 'Suggestion' column is reached, skip the next column
+            last_col_idx += 1
+        
+        if ws.title == 'Overview' and header == 'Inspection':  # When 'Inspecton' column is reached, skip the next column
             last_col_idx += 1
 
         ws.insert_cols(insert_at)
@@ -225,14 +229,39 @@ def create_summary_sheet(wb):
     summary_ws['H1'].value = 'On-hand Stock'
     return wb
 
-def format_due_date(wb,due_date_idx):
+# def format_due_date(wb,due_date_idx):
+#     for ws in wb.worksheets:
+#         if ws.title == 'Summary':
+#             continue
+#         # Apply 'DD/MM/YYYY' format to all rows in column J('Due Date')
+#         for row in ws.iter_rows(min_row=2, min_col=due_date_idx, max_col=due_date_idx):
+#             for cell in row:
+#                 cell.number_format = 'DD/MM/YYYY'
+
+def format_due_date(wb, due_date_cols):
     for ws in wb.worksheets:
-        if ws.title == 'Summary':
+        if ws.title == 'Summary' or ws.title == 'Overview':
             continue
-        # Apply 'DD/MM/YYYY' format to all rows in column J('Due Date')
-        for row in ws.iter_rows(min_row=2, min_col=due_date_idx, max_col=due_date_idx):
-            for cell in row:
-                cell.number_format = 'DD/MM/YYYY'
+        # Apply 'DD/MM/YYYY' format to each specified column
+        for col_idx in due_date_cols:
+            for row in ws.iter_rows(min_row=2, min_col=col_idx, max_col=col_idx):
+                for cell in row:
+                    cell.number_format = 'DD/MM/YYYY'
+
+def empty_folder(folder_path='source'):
+    if not os.path.exists(folder_path):
+        print(f"Folder does not exist: {folder_path}")
+        return
+
+    for filename in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, filename)
+        try:
+            os.remove(file_path)
+            print(f"Deleted: {file_path}")
+        except Exception as e:
+            print(f"Failed to delete {file_path}. Reason: {e}")
+
+    print(f"Emptied folder: {folder_path}")
 
 
 

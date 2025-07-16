@@ -43,6 +43,50 @@ def tpr_sheet_config():
         ]
     }
 
+    # Create these sheets for the overview tab
+    yield {
+        "name": "OHS",
+        "filters": [
+            lambda df: df['Source'].str.contains('On-hand', na=False, case=False),
+        ]
+    }
+    yield {
+        "name": "MO",
+        "filters": [
+            lambda df: df['Source'].str.startswith('Job', na=False,)
+        ]
+    }
+    yield {
+        "name": "SO",
+        "filters": [
+            lambda df: df['Source'].str.contains('SO:', na=False, case=False)
+        ]
+    }
+    yield {
+        "name": "PO",
+        "filters": [
+            lambda df: df['Source'].str.contains('PO:', na=False, case=False),
+        ]
+    }
+    yield {
+        "name": "Forecast",
+        "filters": [
+            lambda df: df['Source'].str.contains('Forecast', na=False, case=False),
+        ]
+    }
+    yield {
+        "name": "Suggestion",
+        "filters": [
+            lambda df: df['Source'].str.contains('Suggestion For Warehouse', na=False, case=False),
+        ]
+    }
+    yield {
+        "name": "Inspection",
+        "filters": [
+            lambda df: df['Source'].str.contains('Inspection', na=False, case=False),
+            lambda df: df['BalanceQty3'] != 'Direct'
+        ]
+    }
     print("Filtered sheets created")
 
 
@@ -114,7 +158,7 @@ def pivot_table_generator():
     yield{
         'sheet_name' : 'Inventory by WH',
         'table_range' : c.Inventory_Pivot_Range,
-        'pivot_table_location' :'O1',
+        'pivot_table_location' :'S1',
         'row_field' : ['Part Num'],
         'column_field': ['Area'],
         'data_field' : [('On Hand','sum')]
