@@ -1,5 +1,6 @@
 import constants as c
 import shutil
+import win32com.client
 
 from worksheet_manager import prepare_working_sheet
 from worksheet_manager import adjust_column_width
@@ -58,6 +59,8 @@ def main_summary():
     main_wb.save(c.dest_summary_file)
 
 ######################### USING WIN32 LIB ########################
+
+    win32com.client.gencache.EnsureDispatch("Excel.Application")
 
     # Open excel wb using win32 
     excel,wb = open_excel_with_win32(c.file_path_summary_win32)

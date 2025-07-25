@@ -47,7 +47,7 @@ COLUMNS_TO_ADD_SUMMARY = ['MO','PO','SO','Forecast','MO Comp','Available','Avail
 
 # Columns to be added/copied (Overview)
 COLUMNS_TO_COPY_OVERVIEW = [1, 2, 3, 4, 5, 6,11] # Columns A to F and K
-COLUMNS_TO_ADD_OVERVIEW = ['SO','Forecast','MO','MO Comp','MRP','MRP Comp','PO','Suggestion','Insp','Proj','Chk','Chk2','Cat','Std Cost','Value','On Hand','W/o MRP/Suggestion','Cat2','Value2','On Hand','Inventory']
+COLUMNS_TO_ADD_OVERVIEW = ['SO','Forecast','MO','MO Comp','MRP','MRP Comp','PO','Suggestion','Insp','Proj','Chk','Chk2','Cat','Std Cost','Value','On Hand','Safety Stocks','W/o MRP/Suggestion','Cat2','Value2','On Hand','Inventory']
 
 # Table ranges 
 MRP_Table_Range = 'MRP!$A:$K' 
@@ -108,12 +108,13 @@ formula_map_overview = {
     '19': '=IF(ABS(Q{row}-R{row})<0.00001, TRUE, FALSE)', # Column S (Chk2)
     '20': '=IF(R{row}>0, "Excess", IF(R{row}=0, "ok", "Shortage"))', # Column T (Cat)
     '22': "=R{row}*U{row}", # Column V (Value)
-    '23': "=MIN(G{row},R{row})*U{row}", # Column W (On Hand)
-    '24': "=N(G{row})-N(H{row})-N(I{row})+N(J{row})-N(K{row})+N(N{row})+N(P{row})", # Column X (W/o MRP/Suggestion)
-    '25': '=IF(X{row}>0, "Excess", IF(X{row}=0, "ok", "Shortage"))', # Column Y (Cat2)
-    '26': '=X{row}*U{row}', # Column Z (Value2)
-    '27': "=MIN(G{row},X{row})*U{row}", # Column AA (On Hand)
-    '28': "= G{row}*U{row}" # Column AB (Inventory)
+    '23': "=G{row}*U{row}", # Column W (On Hand)
+    '24': "=F{row}*U{row}", #Column X (Safety Stocks)
+    '25': "=N(G{row})-N(H{row})-N(I{row})+N(J{row})-N(K{row})+N(N{row})+N(P{row})", # Column Y (W/o MRP/Suggestion)
+    '26': '=IF(Y{row}>0, "Excess", IF(Y{row}=0, "ok", "Shortage"))', # Column Z (Cat2)
+    '27': '=Y{row}*U{row}', # Column AA (Value2)
+    '28': "=G{row}*U{row}", # Column AB (On Hand)
+    '29': "=G{row}*U{row}" # Column ACS (Inventory)
 }
 
 

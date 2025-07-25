@@ -27,8 +27,7 @@ from data_manipulation import create_TPR_columns
 from data_manipulation import generate_formula_TPR_SUMMARY
 
 from overview import create_overview_sheet
-
-from api_handler import update_excel_with_standard_cost
+from overview import copy_paste_as_values
 
 from COMfix import clear_cache
 
@@ -75,7 +74,6 @@ def main():
 
     # Create overview sheet 
     create_overview_sheet(main_wb)
-    #update_excel_with_standard_cost(main_wb,c.dest_file)
 
     # Miscellaneous
     copy_header_styles(working_sheet,main_wb,header_row=1)
@@ -111,8 +109,9 @@ def main():
         insert_pt(wb_main,**config)
 
     create_TPR_columns(wb_main)
-    generate_formula_TPR_SUMMARY(wb_main,'TPR Inventory',c.formula_map_tpr) # Generate formulas for the tpr inventory 
-    generate_formula_TPR_SUMMARY(wb_main,'Overview',c.formula_map_overview) # Generate formulas for the tpr inventory 
+    generate_formula_TPR_SUMMARY(wb_main,'TPR Inventory',c.formula_map_tpr) # Generate formulas for the tpr inventory sheet
+    generate_formula_TPR_SUMMARY(wb_main,'Overview',c.formula_map_overview) # Generate formulas for the tpr overview sheet
+    copy_paste_as_values(wb_main) # Copy paste the entire overview sheet as values so the formulas dont show 
 
     # Save and close excel wb 
     close_excel_with_win32(excel,wb_main) 

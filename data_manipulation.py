@@ -385,26 +385,62 @@ def create_TPR_columns(wb):
     except Exception as e:
         print(f"Error: {e}")
 
-def generate_formula_TPR_SUMMARY(wb, sheet_name, formula_map): # Generate formulas for TPR and Summary reports 
+# def generate_formula_TPR_SUMMARY(wb, sheet_name, formula_map): # Generate formulas for TPR and Summary reports 
 
-        ws = wb.Sheets(sheet_name)
+#         ws = wb.Sheets(sheet_name)
 
-        # Get the last row using the Excel COM method (win32com)
-        last_row = ws.Cells(ws.Rows.Count, 1).End(-4162).Row  # -4162 is xlUp
+#         # Get the last row using the Excel COM method (win32com)
+#         last_row = ws.Cells(ws.Rows.Count, 1).End(-4162).Row  # -4162 is xlUp
 
-        # Loop through rows and columns to set the formulas
-        for row in range(2, last_row + 1):
-            for col_index_str, formula_template in formula_map.items():
-                col_index = int(col_index_str)  # Convert string key to integer column index
+#         # Loop through rows and columns to set the formulas
+#         for row in range(2, last_row + 1):
+#             for col_index_str, formula_template in formula_map.items():
+#                 col_index = int(col_index_str)  # Convert string key to integer column index
+#                 formula = formula_template.format(row=row)
+#                 try:
+#                     ws.Cells(row, col_index).Formula = formula
+#                     print(f"Pasted formula at Row {row}, Column {col_index}: {formula}")
+#                 except Exception as e:
+#                     print(f"[ERROR] Failed to insert formula at row {row}, col {col_index}: {formula}")
+#                     raise
+
+#         print("Formulas pasted successfully.")
+
+def generate_formula_TPR_SUMMARY(wb, sheet_name, formula_map):
+    ws = wb.Sheets(sheet_name)
+
+    # Disable screen updating and auto calculation for speed
+    excel = wb.Application
+    excel.Calculation = -4135  # xlCalculationManual
+
+    try:
+        # Get the last row
+        last_row = ws.Cells(ws.Rows.Count, 1).End(-4162).Row  # -4162 = xlUp
+
+        for col_index_str, formula_template in formula_map.items():
+            col_index = int(col_index_str)
+            formulas = []
+
+            # Build all formulas for this column in a list
+            for row in range(2, last_row + 1):
                 formula = formula_template.format(row=row)
-                try:
-                    ws.Cells(row, col_index).Formula = formula
-                    print(f"Pasted formula at Row {row}, Column {col_index}: {formula}")
-                except Exception as e:
-                    print(f"[ERROR] Failed to insert formula at row {row}, col {col_index}: {formula}")
-                    raise
+                formulas.append([formula])  # Keep as list for Excel 2D array
+
+            # Assign all formulas in one go
+            formula_range = ws.Range(ws.Cells(2, col_index), ws.Cells(last_row, col_index))
+            formula_range.Value = formulas
+
+            print(f"Column {col_index} updated with {len(formulas)} formulas.")
 
         print("Formulas pasted successfully.")
+
+    except Exception as e:
+        print(f"[ERROR] Failed during formula generation: {e}")
+        raise
+
+    finally:
+        # Re-enable calculation and events
+        excel.Calculation = -4105  # xlCalculationAutomatic
 
 
 

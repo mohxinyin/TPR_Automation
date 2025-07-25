@@ -67,3 +67,24 @@ def create_overview_sheet(wb):
         cell.font = bold_font
 
     return wb
+
+def copy_paste_as_values(wb):
+    try:
+        # Get the 'Overview' sheet
+        ws = wb.Sheets('Overview')
+
+        # Find the used range (all non-empty cells)
+        used_range = ws.UsedRange
+
+        # Copy the used range
+        used_range.Copy()
+
+        # Paste as values into the same range
+        used_range.PasteSpecial(Paste=-4163)  # -4163 = xlPasteValues
+
+        # Save changes
+        wb.Save()
+        print("PasteSpecial (Values) completed successfully.")
+
+    except Exception as e:
+        print(f"Error: {e}")
