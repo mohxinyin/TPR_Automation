@@ -1,6 +1,7 @@
 import constants as c
 import datetime
 import os
+import psutil
 from copy import copy
 from openpyxl.utils import column_index_from_string
 from openpyxl.styles import Font
@@ -248,7 +249,7 @@ def format_due_date(wb, due_date_cols):
                 for cell in row:
                     cell.number_format = 'DD/MM/YYYY'
 
-def empty_folder(folder_path='source'):
+def empty_folder(folder_path='src'):
     if not os.path.exists(folder_path):
         print(f"Folder does not exist: {folder_path}")
         return
@@ -262,6 +263,17 @@ def empty_folder(folder_path='source'):
             print(f"Failed to delete {file_path}. Reason: {e}")
 
     print(f"Emptied folder: {folder_path}")
+
+def kill_excel_processes():
+    """Force-kill all lingering Excel processes."""
+    for proc in psutil.process_iter(['pid', 'name']):
+        try:
+            if proc.info['name'] and 'EXCEL.EXE' in proc.info['name']:
+                proc.kill()
+                print(f"Killed lingering Excel process: PID {proc.info['pid']}")
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
+
 
 
 

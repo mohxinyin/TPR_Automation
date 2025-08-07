@@ -2,9 +2,9 @@ import os
 
 # CONSTANTS
 # Source files
-source_file = 'source/tpr.xlsx'
+source_file = 'src/tpr.xlsx'
 header_file = 'TPR HEADER.xlsx' 
-qoh_file = 'source/qoh.xlsx' # Quantity on hand file 
+qoh_file = 'src/qoh.xlsx' # Quantity on hand file 
 
 # Extract base name without extension
 base_name = os.path.splitext(os.path.basename(source_file))[0] # Extracts the final componenet of the path 
@@ -17,6 +17,10 @@ dest_summary_file = f"dest/{base_name} Summary.xlsx"
 file_path_win32 = fr"C:\Users\xinyi.moh\Programs\ExcelAutomation - Copy\dest\{base_name}.xlsx" 
 file_path_summary_win32 = fr"C:\Users\xinyi.moh\Programs\ExcelAutomation - Copy\dest\{base_name} Summary.xlsx"
 header_path_win32 = r"C:\Users\xinyi.moh\Programs\ExcelAutomation - Copy\TPR HEADER.xlsx"
+
+# file_path_win32 = fr"C:\py\tpr\dest\{base_name}.xlsx"
+# file_path_win32 = fr"C:\py\tpr\dest\{base_name} Summary.xlsx"
+# header_path_win32 = fr"C:\py\tpr\TPR HEADER.xlsx"
 
 # Columns to be deleted 
 COLUMNS_TO_DELETE_WORKING  = [

@@ -25,9 +25,6 @@ def main_summary():
     
 ######################### USING OPENPYXL ########################
 
-    # Convert csv to excel file 
-    #load_and_convert_csv(c.source_file,c.dest_summary_file)
-
     # Duplicate the excel file and place in another folder  
     shutil.copyfile(c.source_file, c.dest_summary_file)
 

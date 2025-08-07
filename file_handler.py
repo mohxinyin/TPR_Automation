@@ -1,5 +1,5 @@
 import pandas as pd  
-import constants as c 
+ 
 from openpyxl import load_workbook
 from win32com.client import gencache
 
@@ -58,7 +58,7 @@ def load_excel_workbook(file_path):
     except Exception as e:
         print(f"An error occurred while loading the workbook: {e}")
 
-def open_excel_with_win32(file_path, visible=False):
+def open_excel_with_win32(excel,file_path, visible=False):
     """
     Opens Excel and a single workbook using win32com.
     
@@ -70,15 +70,16 @@ def open_excel_with_win32(file_path, visible=False):
         tuple: (excel_app, workbook)
     """
     try:
-        excel = gencache.EnsureDispatch("Excel.Application")
-        excel.Visible = visible
+        excel.Visible = False
         excel.EnableEvents = False
         excel.ScreenUpdating = False
+        excel.DisplayAlerts = False
 
         if not visible:
             excel.WindowState = -4140  # Minimize if still trying to show
 
         workbook = excel.Workbooks.Open(file_path)
+
         print("Excel workbook loaded with win32 lib")        
         return excel, workbook
     
@@ -86,12 +87,12 @@ def open_excel_with_win32(file_path, visible=False):
         print(f"[ERROR] Could not open Excel or workbook: {e}")
         raise
 
-def close_excel_with_win32(excel, workbook, save=True):
+def close_excel_with_win32(workbook, save=True):
     try:
         if save:
             workbook.Save()
         workbook.Close(False)
-        excel.Quit()
+        #excel.Quit()
         print("Closed and saved excel workbook")
     except Exception as e:
         print(f"[ERROR] Failed during Excel/workbook cleanup: {e}")
